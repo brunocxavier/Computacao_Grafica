@@ -1,0 +1,23 @@
+# depslib dependency file v1.0
+1555186730 source:c:\users\bruno\onedrive\documentos\computaçao grafica\tp1\main.c
+	<SOIL/SOIL.h>
+	<GL/glew.h>
+	<GL/freeglut.h>
+	<stdlib.h>
+	<stdio.h>
+
+1555562027 source:c:\users\bruno\onedrive\Área de trabalho\tp1\main.c
+	<SOIL/SOIL.h>
+	<GL/glew.h>
+	<GL/freeglut.h>
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	<time.h>
+
+1555348412 source:c:\users\bruno\onedrive\Área de trabalho\tp1\fontes.c
+	<GL/glew.h>
+	<GL/freeglut.h>
+	<stdlib.h>
+	<string.h>
+
