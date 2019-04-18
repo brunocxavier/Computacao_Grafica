@@ -18,7 +18,7 @@ float xViewport = 0;
 float yViewport = 0;
 float wViewport = 450;
 float hViewport = 800;
-int pausa = 0;
+int pausa = 1;
 char pontosescreve[6] = {"0"};
 int pontostotais = 0;
 int zerar=0;
@@ -27,6 +27,9 @@ int subir = 1;
 int direita = 0;
 int reiniciar = 0;
 int fechar = 0;
+int telainicial = 1;
+int creditos = 0;
+int fimdecreditos = 0;
 int tamanhosx[10] = {10,10,10,10,10,15,15,15,15,40};
 int tamanhosy[10] = {7,7,7,7,7,20,20,10,10,30};
 int pontuacao[10] = {250,250,250,250,250,-500,-500,-250,-250,-1000};
@@ -192,18 +195,79 @@ void desenhaCorfirmacao(){
     escreve(GLUT_BITMAP_HELVETICA_18, "Nao",60 ,73 ,10);
 }
 
+void desenhaTelainicial(){
+    glColor3f(0,1,0);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Pescaria: o jogo",30,140,10);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Iniciar",38,108,10);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Creditos",38,78,10);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Fechar",38,48,10);
+    glColor3f(1,0,0);
+    desenhaRetangulo(25,100,40,20,9);
+    desenhaRetangulo(25,70,40,20,9);
+    desenhaRetangulo(25,40,40,20,9);
+}
+
+void desenhaCreditos(){
+    glColor3f(1,1,1);
+    escreve(GLUT_BITMAP_HELVETICA_18,"Direcao de Desnvolvimento",28,130,10);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Bruno Xavier",28,125,10);
+    escreve(GLUT_BITMAP_HELVETICA_18,"Testes",28,115,10);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Bruno Xavier",28,110,10);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Ricardo Xavier",28,105,10);
+    escreve(GLUT_BITMAP_HELVETICA_18,"Direcao de Arte",28,95,10);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Bruno Xavier",28,90,10);
+    escreve(GLUT_BITMAP_HELVETICA_18,"Agradecimentos",28,80,10);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Bruno Xavier",28,75,10);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Ricardo Xavier",28,70,10);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"E voce",28,65,10);
+}
 // Rotina de desenho
 void desenhaMinhaCena(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    desenhaJogo();
-    if(reiniciar == 1 || fechar == 1){
-            desenhaCorfirmacao();
+    if(telainicial == 1){
+        desenhaTelainicial();
+    }
+    else if(telainicial == 0 && creditos == 0){
+        desenhaJogo();
+        if(reiniciar == 1 || fechar == 1){
+                desenhaCorfirmacao();
+        }
+    }
+    else if(creditos == 1){
+        desenhaCreditos();
+        fimdeCreditos();
     }
     glutSwapBuffers();
 }
 
+void fimdeCreditos(){
+    if(creditos == 1){
+        fimdecreditos++;
+        if(fimdecreditos>=165){
+            telainicial = 1;
+            creditos = 0;
+            fimdecreditos = 0;
+            criaPeixes();
+            glutPostRedisplay();
+            pontostotais = 0;
+            sprintf(pontosescreve, "%i", pontostotais);
+            sobefundo = 0;
+            sobeobjeto = 0;
+            movanzol = 0;
+            pontostotais = 0;
+            descer = 0;
+            subir = 1;
+            zerar = 0;
+            pausa = 0;
+            reiniciar = 0;
+            desenhaMinhaCena();
+        }
+        glutTimerFunc(33, fimdeCreditos, 0);
+    }
+}
+
 void atualiza(){
-    if(pausa==0){
+    if(pausa == 0){
         glutPostRedisplay();
         //movimenta os peixes para direita
         if(movepeixe==-LARGURA_DO_MUNDO||direita==1){
@@ -223,13 +287,17 @@ void atualiza(){
                     peixe[i].pego=0;
                 }
             }
-            zerar=1;
+            zerar = 1;
             sobeobjeto -= 3;
             sobefundo -= 2.5;
             descer=1;
             if(sobefundo<-45){
-                descer=0;
-                subir=0;
+                descer = 0;
+                subir = 0;
+                creditos = 1;
+                fimdecreditos = 0;
+                pausa = 1;
+                fimdeCreditos();
             }
         }
         //desce o anzol
@@ -262,7 +330,7 @@ void reinicia(){
 }
 
 void setup() {
-    glClearColor(1, 1, 1, 0);
+    glClearColor(0, 0, 0, 0);
 }
 
 // mantendo o aspecto
@@ -375,6 +443,22 @@ void GerenciaMouse(int button, int state, int x_i, int y_i){
         pausa = 0;
         atualiza();
     }
+    else if(button == GLUT_LEFT_BUTTON && testeColisao(x,x,y,y,65,25,120,100) == 1
+            && telainicial == 1){
+                telainicial = 0;
+                pausa = 0;
+                atualiza();
+            }
+    else if(button == GLUT_LEFT_BUTTON && testeColisao(x,x,y,y,65,25,90,70) == 1
+            && telainicial == 1){
+                telainicial = 0;
+                creditos = 1;
+                atualiza();
+            }
+    else if(button == GLUT_LEFT_BUTTON && testeColisao(x,x,y,y,65,25,60,40) == 1
+            && telainicial == 1){
+                exit(0);
+            }
 }
 
 // Função principal
@@ -391,7 +475,7 @@ int main(int argc, char** argv){
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowSize(450, 800);
 
-    glutCreateWindow("Jogo");
+    glutCreateWindow("Pescaria: o jogo");
     //init();
     // Registra callbacks para eventos
     glEnable(GL_DEPTH_TEST);
