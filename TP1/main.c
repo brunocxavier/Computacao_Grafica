@@ -11,6 +11,24 @@
 #define Mov_lados 2.5;
 float movanzol = 0;
 FILE *log;
+GLuint texturaanzol;
+GLuint texturafundo;
+GLuint texturapescador;
+GLuint texturapeixedir[6];
+GLuint texturapeixeesq[6];
+GLuint texturatubaraodir[6];
+GLuint texturatubaraoesq[6];
+GLuint texturaaguaviva[9];
+GLuint texturabaracudaesq[8];
+GLuint texturabaracudadir[8];
+GLuint texturaceu;
+GLuint texturapeixe;
+GLuint texturacaixagrande;
+GLuint texturacaixapequena;
+GLuint texturachao;
+int postexturapeixe = 0;
+int postexturaaguaviva = 0;
+int postexturabaracuda = 0;
 float sobefundo = 0;
 float sobeobjeto = 0;
 float movepeixe = 0;
@@ -25,15 +43,16 @@ int zerar=0;
 int descer = 0;
 int subir = 1;
 int direita = 0;
+int angulo = 0;
 int reiniciar = 0;
 int fechar = 0;
 int telainicial = 1;
 int creditos = 0;
 int fimdecreditos = 0;
-int tamanhosx[10] = {10,10,10,10,10,15,15,15,15,40};
+int tamanhosx[10] = {10,10,10,10,10,15,15,40,40,40};
 int tamanhosy[10] = {7,7,7,7,7,20,20,10,10,30};
 int pontuacao[10] = {250,250,250,250,250,-500,-500,-250,-250,-1000};
-char tipos[][50]={"tubarao","peixe","agua_viva","baiacu"};
+char tipos[][50]={"tubarao","peixe","agua_viva","baracuda"};
 struct peixe{
     int tamanhox;
     int tamanhoy;
@@ -75,20 +94,35 @@ int testeColisao(int x1max,int x1min,int y1max,int y1min,int x2max,int x2min,int
    return 0;
 }
 
-void desenhaAnzol(int x, int y,int z) {
-  glPushMatrix();
-    glTranslatef(x,y,0);
-    glBegin(GL_TRIANGLE_FAN);
-        glVertex3f(0,0,z);
-        glVertex3f(7,0,z);
-        glVertex3f(7,7,z);
-        glVertex3f(0,7,z);
-    glEnd();
-  glPopMatrix();
+GLuint carregaTextura(const char* arquivo){
+    GLuint idTextura = SOIL_load_OGL_texture(
+                           arquivo,
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+    return idTextura;
 }
 
-void desenhaRetangulo(int x,int y, int w,int h,int z){
+void desenhaAnzol(int x, int y, int z, GLuint textura) {
+    glPushMatrix();
+    glTranslatef(x,y,0);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, textura);
+    glBegin(GL_TRIANGLE_FAN);
+    glTexCoord2f(0, 0); glVertex3f(0,0,z);
+    glTexCoord2f(1, 0); glVertex3f(7,0,z);
+    glTexCoord2f(1, 1); glVertex3f(7,7,z);
+    glTexCoord2f(0, 1); glVertex3f(0,7,z);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
+}
+
+void desenhaRetangulo(int x,int y, float w,int h,int z){
     if(y+h>=0){
+        //glEnable(GL_TEXTURE_2D);
+        //glBindTexture(GL_TEXTURE_2D, textura);
         glPushMatrix();
         glTranslatef(x,y,0);
         glBegin(GL_TRIANGLE_FAN);
@@ -97,24 +131,66 @@ void desenhaRetangulo(int x,int y, int w,int h,int z){
             glVertex3f(w,h,z);
             glVertex3f(0,h,z);
         glEnd();
+        //glDisable(GL_TEXTURE_2D);
+        glPopMatrix();
+    }
+}
+
+void desenhaRetanguloTxt(int x,int y, int w,int h,int z,GLuint textura){
+    if(y+h>=0){
+        glPushMatrix();
+        glTranslatef(x,y,0);
+        glRotated(angulo,0,0,1);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, textura);
+        glBegin(GL_TRIANGLE_FAN);
+            glTexCoord2f(0, 0); glVertex3f(0,0,z);
+            glTexCoord2f(1, 0); glVertex3f(w,0,z);
+            glTexCoord2f(1, 1); glVertex3f(w,h,z);
+            glTexCoord2f(0, 1); glVertex3f(0,h,z);
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
         glPopMatrix();
     }
 }
 
 void desenhaJogo(){
-    glColor3f(0, 0, 1);
+    glColor4f(1, 1, 1, 1);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    desenhaRetangulo(0, 0, LARGURA_DO_MUNDO, ALTURA_DO_MUNDO+sobefundo,1);
+    desenhaRetanguloTxt(0, 0+sobefundo, 90, 160, 5,texturafundo);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    desenhaRetanguloTxt(0, -160+sobefundo, 90, 160, 5,texturafundo);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    desenhaRetanguloTxt(0, -320+sobefundo, 90, 160, 5,texturafundo);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    desenhaRetanguloTxt(0, -480+sobefundo, 90, 160, 5,texturafundo);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    desenhaRetanguloTxt(0, -640+sobefundo, 90, 160, 5,texturafundo);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    desenhaRetanguloTxt(0, -800+sobefundo, 90, 160, 5,texturafundo);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    desenhaRetanguloTxt(0, -960+sobefundo, 90, 160, 5,texturafundo);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    desenhaRetanguloTxt(0, -1120+sobefundo, 90, 160, 5,texturafundo);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    desenhaRetanguloTxt(0, -1280+sobefundo, 90, 160, 5,texturafundo);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    desenhaRetanguloTxt(0, -1440+sobefundo, 90, 160, 5,texturafundo);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    desenhaRetanguloTxt(0, -1600+sobefundo, 90, 160, 5,texturafundo);
 
-    // desenha o anzol no meio e o movimenta por meio do movanzol
-    glColor3f(1, 0, 0);
+    // desenha o anzol e linha no meio e o movimenta por meio do movanzol
+    glColor3f(1,1,1);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    desenhaRetangulo(LARGURA_DO_MUNDO/2 - 2 + movanzol,ALTURA_DO_MUNDO/2+2,0.1,90,7);
+    glColor3f(0.6, 0.6, 0.6);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    desenhaAnzol(LARGURA_DO_MUNDO/2 - 5 + movanzol, ALTURA_DO_MUNDO/2- 5,7);
+    desenhaAnzol(LARGURA_DO_MUNDO/2 - 5 + movanzol, ALTURA_DO_MUNDO/2- 5,7,texturaanzol);
 
     // desenha "chao" de areia
-    glColor3f(0,0,0);
+    glColor3f(1,1,1);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    desenhaRetangulo(0,-1600+sobeobjeto,LARGURA_DO_MUNDO,100,10);
+    desenhaRetanguloTxt(0,-1550+sobeobjeto,LARGURA_DO_MUNDO,80,10,texturachao);
 
     //desenha caixa da pontuaçao e pontuacao
     glColor3f(0,1,0);
@@ -124,71 +200,98 @@ void desenhaJogo(){
     escreve(GLUT_BITMAP_HELVETICA_18, pontosescreve,LARGURA_DO_MUNDO-12 ,ALTURA_DO_MUNDO-5 ,10);
 
     //desenha ceu
-    glColor3f(0,1,1);
+    glColor3f(1,1,1);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    desenhaRetangulo(0,130+sobefundo,LARGURA_DO_MUNDO,160,5);
+    desenhaRetanguloTxt(0,130+sobefundo,LARGURA_DO_MUNDO,160,8,texturaceu);
 
     //desenha barco e pescador
-    glColor3f(1,1,0);
+    glColor3f(1,1,1);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    desenhaRetangulo(LARGURA_DO_MUNDO/2-10,130+sobefundo,20,10,10);
+    desenhaRetanguloTxt(15,130+sobefundo,60,30,10,texturapescador);
 
 
     //desenha peixes
-    for(int i=0; i<20;i++){
-       if(testeColisao(47 + movanzol,40+ movanzol,82,75,
-                       90+movepeixe+peixe[i].tamanhox,90+movepeixe,
-                       peixe[i].posicaoinicialy+sobeobjeto+peixe[i].tamanhoy,
-                        peixe[i].posicaoinicialy+sobeobjeto)==1&&peixe[i].pego==0){
-                peixe[i].pego = 1;
-                pontostotais += peixe[i].pontos;
-                if(pontostotais<0){
-                    pontostotais = 0;
+        for(int i=0; i<20;i++){
+
+               if(testeColisao(47 + movanzol,40+ movanzol,82,75,
+                               90+movepeixe+peixe[i].tamanhox,90+movepeixe,
+                               peixe[i].posicaoinicialy+sobeobjeto+peixe[i].tamanhoy,
+                                peixe[i].posicaoinicialy+sobeobjeto)==1&&peixe[i].pego==0){
+                        peixe[i].pego = 1;
+                        pontostotais += peixe[i].pontos;
+                        if(pontostotais<0){
+                            pontostotais = 0;
+                        }
+                        sprintf(pontosescreve, "%i", pontostotais);
+                   }
+                switch(peixe[i].tipo){
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    glColor3f(1,1,1);//peixe amigo 1
+                    if(direita == 1 && peixe[i].pego == 0 ){
+                        texturapeixe = texturapeixedir[postexturapeixe];
+                    }
+                    else{
+                        texturapeixe = texturapeixeesq[postexturapeixe];
+                    }
+                    break;
+                case 5:
+                case 6:
+                    glColor3f(1,1,1);//agua viva
+                    texturapeixe = texturaaguaviva[postexturaaguaviva];
+                    break;
+                case 7:
+                case 8:
+                    glColor3f(1,1,1);//peixe amigo 2
+                    if(direita == 1){
+                        texturapeixe = texturabaracudadir[postexturabaracuda];
+                    }
+                    else{
+                        texturapeixe = texturabaracudaesq[postexturabaracuda];
+                    }
+                    break;
+                case 9:
+                    glColor3f(1,1,1);//tubarao
+                    if(direita == 1){
+                        texturapeixe = texturatubaraodir[postexturapeixe];
+                    }
+                    else{
+                        texturapeixe = texturatubaraoesq[postexturapeixe];
+                    }
+                    break;
                 }
-                sprintf(pontosescreve, "%i", pontostotais);
-           }
-        switch(peixe[i].tipo){
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            glColor3f(1,0,1);//peixe amigo
-            break;
-        case 5:
-        case 6:
-            glColor3f(0,0,0);//agua viva
-            break;
-        case 7:
-        case 8:
-            glColor3f(0.6,0.6,0.6);//baiacu
-            break;
-        case 9:
-            glColor3f(1,1,1);//tubarao
-            break;
-        }
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        if(peixe[i].pego==0||peixe[i].pontos<0){
-            desenhaRetangulo(LARGURA_DO_MUNDO+movepeixe,peixe[i].posicaoinicialy+sobeobjeto,
-                            peixe[i].tamanhox,peixe[i].tamanhoy,6);
-        }
-        else if(peixe[i].pego==1){
-            desenhaRetangulo(LARGURA_DO_MUNDO/2+movanzol,ALTURA_DO_MUNDO/2-5,
-                            peixe[i].tamanhox,peixe[i].tamanhoy,6);
-        }
-    }
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                if(peixe[i].pego == 0||peixe[i].pontos<0){
+                    angulo = 0;
+                    desenhaRetanguloTxt(LARGURA_DO_MUNDO+movepeixe,peixe[i].posicaoinicialy+sobeobjeto,
+                                    peixe[i].tamanhox,peixe[i].tamanhoy,6,texturapeixe);
+                }
+                else if(peixe[i].pego == 1){
+                    angulo = -90;
+                    desenhaRetanguloTxt(45+movanzol-3.5,75,
+                                    peixe[i].tamanhox,peixe[i].tamanhoy,6,texturapeixe);
+                }
+            }
 }
 
+void desenha2fase(){
+
+
+
+}
 void desenhaCorfirmacao(){
-    glColor3f(0,0,0);
+    glColor3f(0.63,0.32,0.17);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    desenhaRetangulo(5,60,80,40,8);
-    glColor3f(1,1,0);
+    desenhaRetanguloTxt(5,60,80,40,8,texturacaixagrande);
+    glColor3f(0.95,1,1);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    desenhaRetangulo(15,70,20,10,9);
-    glColor3f(1,1,1);
+    desenhaRetanguloTxt(15,70,20,10,9,texturacaixapequena);
+    glColor3f(0.95,1,1);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    desenhaRetangulo(55,70,20,10,9);
+    desenhaRetanguloTxt(55,70,20,10,9,texturacaixapequena);
     glColor3f(0,1,0);
     escreve(GLUT_BITMAP_HELVETICA_18, "Tem certeza? ",35 ,90 ,10);
     escreve(GLUT_BITMAP_HELVETICA_18, "Sim",20 ,73 ,10);
@@ -197,14 +300,14 @@ void desenhaCorfirmacao(){
 
 void desenhaTelainicial(){
     glColor3f(0,1,0);
-    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Pescaria: o jogo",30,140,10);
-    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Iniciar",38,108,10);
-    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Creditos",38,78,10);
-    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Fechar",38,48,10);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Pescaria: o jogo",30,140,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Iniciar",38,108,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Creditos",38,78,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Fechar",38,48,7);
     glColor3f(1,0,0);
-    desenhaRetangulo(25,100,40,20,9);
-    desenhaRetangulo(25,70,40,20,9);
-    desenhaRetangulo(25,40,40,20,9);
+    desenhaRetanguloTxt(25,100,40,20,6,texturacaixagrande);
+    desenhaRetanguloTxt(25,70,40,20,6,texturacaixagrande);
+    desenhaRetanguloTxt(25,40,40,20,6,texturacaixagrande);
 }
 
 void desenhaCreditos(){
@@ -226,6 +329,9 @@ void desenhaMinhaCena(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(telainicial == 1){
         desenhaTelainicial();
+        if(fechar == 1){
+            desenhaCorfirmacao();
+        }
     }
     else if(telainicial == 0 && creditos == 0){
         desenhaJogo();
@@ -257,10 +363,11 @@ void fimdeCreditos(){
             pontostotais = 0;
             descer = 0;
             subir = 1;
+            direita = 0;
             zerar = 0;
             pausa = 0;
             reiniciar = 0;
-            desenhaMinhaCena();
+            //desenhaMinhaCena();
         }
         glutTimerFunc(33, fimdeCreditos, 0);
     }
@@ -269,8 +376,20 @@ void fimdeCreditos(){
 void atualiza(){
     if(pausa == 0){
         glutPostRedisplay();
+        postexturapeixe++;
+        postexturaaguaviva++;
+        postexturabaracuda++;
+        if(postexturapeixe == 6){
+            postexturapeixe = 0;
+        }
+        if(postexturaaguaviva == 9){
+            postexturaaguaviva = 0;
+        }
+        if(postexturabaracuda == 8){
+            postexturabaracuda = 0;
+        }
         //movimenta os peixes para direita
-        if(movepeixe==-LARGURA_DO_MUNDO||direita==1){
+        if(movepeixe == -LARGURA_DO_MUNDO||direita==1){
             movepeixe += 1;
             direita = 1;
             if(movepeixe>=0){
@@ -329,10 +448,6 @@ void reinicia(){
     glutSwapBuffers();
 }
 
-void setup() {
-    glClearColor(0, 0, 0, 0);
-}
-
 // mantendo o aspecto
 void redimensionada(int width, int height) {
     glMatrixMode(GL_PROJECTION);
@@ -372,7 +487,7 @@ void teclaPressionada(unsigned char key, int x, int y){
       }
     }
     //pause
-    if(key == 'p'){
+    if(key == 'p' && telainicial == 0 && creditos == 0){
         if(pausa==0)
             pausa = 1;
         else{
@@ -383,7 +498,7 @@ void teclaPressionada(unsigned char key, int x, int y){
     }
     //reiniciar
     if(key == 'r'){
-        if(reiniciar == 0){
+        if(reiniciar == 0 && telainicial == 0 && creditos == 0){
         reiniciar  = 1;
         pausa = 1;
         desenhaMinhaCena();
@@ -461,6 +576,359 @@ void GerenciaMouse(int button, int state, int x_i, int y_i){
             }
 }
 
+void setup(){
+    glClearColor(0, 0, 0, 1);
+
+    // habilita mesclagem de cores, para termos suporte a texturas (semi-)transparentes
+    glEnable(GL_BLEND );
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+}
+
+void iniciatexturas(){
+    texturaanzol = SOIL_load_OGL_texture(
+                           "anzol2.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixeesq[0] = SOIL_load_OGL_texture(
+                           "peixeesq1.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixeesq[1] = SOIL_load_OGL_texture(
+                           "peixeesq2.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixeesq[2] = SOIL_load_OGL_texture(
+                           "peixeesq3.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixeesq[3] = SOIL_load_OGL_texture(
+                           "peixeesq4.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixeesq[4] = SOIL_load_OGL_texture(
+                           "peixeesq5.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixeesq[5] = SOIL_load_OGL_texture(
+                           "peixeesq6.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixedir[0] = SOIL_load_OGL_texture(
+                           "peixedir1.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixedir[1] = SOIL_load_OGL_texture(
+                           "peixedir2.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixedir[2] = SOIL_load_OGL_texture(
+                           "peixedir3.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixedir[3] = SOIL_load_OGL_texture(
+                           "peixedir4.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixedir[4] = SOIL_load_OGL_texture(
+                           "peixedir5.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapeixedir[5] = SOIL_load_OGL_texture(
+                           "peixedir6.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturaaguaviva[0] = SOIL_load_OGL_texture(
+                           "aguaviva1.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturaaguaviva[1] = SOIL_load_OGL_texture(
+                           "aguaviva2.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturaaguaviva[2] = SOIL_load_OGL_texture(
+                            "aguaviva3.png",
+                            SOIL_LOAD_AUTO,
+                            SOIL_CREATE_NEW_ID,
+                            SOIL_FLAG_INVERT_Y
+                        );
+   texturaaguaviva[3] = SOIL_load_OGL_texture(
+                        "aguaviva4.png",
+                        SOIL_LOAD_AUTO,
+                        SOIL_CREATE_NEW_ID,
+                        SOIL_FLAG_INVERT_Y
+                       );
+   texturaaguaviva[4] = SOIL_load_OGL_texture(
+                           "aguaviva5.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturaaguaviva[5] = SOIL_load_OGL_texture(
+                           "aguaviva6.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturaaguaviva[6] = SOIL_load_OGL_texture(
+                           "aguaviva7.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturaaguaviva[7] = SOIL_load_OGL_texture(
+                           "aguaviva8.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturaaguaviva[8] = SOIL_load_OGL_texture(
+                           "aguaviva9.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturaaguaviva[9] = SOIL_load_OGL_texture(
+                           "aguaviva10.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturatubaraodir[0] = SOIL_load_OGL_texture(
+                           "tubaraodir1.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturatubaraodir[1] = SOIL_load_OGL_texture(
+                           "tubaraodir2.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+    texturatubaraodir[2] = SOIL_load_OGL_texture(
+                           "tubaraodir3.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                        );
+    texturatubaraodir[3] = SOIL_load_OGL_texture(
+                           "tubaraodir4.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturatubaraodir[4] = SOIL_load_OGL_texture(
+                           "tubaraodir5.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturatubaraodir[5] = SOIL_load_OGL_texture(
+                           "tubaraodir6.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturatubaraoesq[0] = SOIL_load_OGL_texture(
+                           "tubaraoesq1.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturatubaraoesq[1] = SOIL_load_OGL_texture(
+                           "tubaraoesq2.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+    texturatubaraoesq[2] = SOIL_load_OGL_texture(
+                           "tubaraoesq3.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                        );
+    texturatubaraoesq[3] = SOIL_load_OGL_texture(
+                           "tubaraoesq4.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+  texturatubaraoesq[4] = SOIL_load_OGL_texture(
+                           "tubaraoesq5.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturatubaraoesq[5] = SOIL_load_OGL_texture(
+                           "tubaraoesq6.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudadir[0] = SOIL_load_OGL_texture(
+                           "baracudadir1.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudadir[1] = SOIL_load_OGL_texture(
+                           "baracudadir2.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudadir[2] = SOIL_load_OGL_texture(
+                           "baracudadir3.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudadir[3] = SOIL_load_OGL_texture(
+                           "baracudadir4.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudadir[4] = SOIL_load_OGL_texture(
+                           "baracudadir5.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+    texturabaracudadir[5] = SOIL_load_OGL_texture(
+                           "baracudadir6.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudadir[6] = SOIL_load_OGL_texture(
+                           "baracudadir7.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudadir[7] = SOIL_load_OGL_texture(
+                           "baracudadir8.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudaesq[0] = SOIL_load_OGL_texture(
+                           "baracudaesq1.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudaesq[1] = SOIL_load_OGL_texture(
+                           "baracudaesq2.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudaesq[2] = SOIL_load_OGL_texture(
+                           "baracudaesq3.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudaesq[3] = SOIL_load_OGL_texture(
+                           "baracudaesq4.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudaesq[4] = SOIL_load_OGL_texture(
+                           "baracudaesq5.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudaesq[5] = SOIL_load_OGL_texture(
+                           "baracudaesq6.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudaesq[6] = SOIL_load_OGL_texture(
+                           "baracudaesq7.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturabaracudaesq[7] = SOIL_load_OGL_texture(
+                           "baracudaesq8.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturapescador = SOIL_load_OGL_texture(
+                           "pescador.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturaceu = SOIL_load_OGL_texture(
+                           "ceu.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturacaixagrande = SOIL_load_OGL_texture(
+                           "caixagrande.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturacaixapequena = SOIL_load_OGL_texture(
+                           "caixapequena.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturafundo = SOIL_load_OGL_texture(
+                           "fundo2.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+   texturachao = SOIL_load_OGL_texture(
+                           "chao.png",
+                           SOIL_LOAD_AUTO,
+                           SOIL_CREATE_NEW_ID,
+                           SOIL_FLAG_INVERT_Y
+                       );
+}
 // Função principal
 int main(int argc, char** argv){
     //log=fopen("peixes.log","w");
@@ -488,6 +956,7 @@ int main(int argc, char** argv){
     atualiza();
 
     setup();
+    iniciatexturas();
 
     glutMainLoop();
     glDisable(GL_DEPTH_TEST);
