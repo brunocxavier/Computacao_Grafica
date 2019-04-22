@@ -441,6 +441,7 @@ void desenhaMinhaCena(){
         desenhaCreditos();
         fimdeCreditos();
     }
+
     glutSwapBuffers();
 }
 
@@ -470,7 +471,7 @@ void fimdeCreditos(){
             descer = 0;
             subir = 1;
             zerar = 0;
-            pausa = 0;
+            pausa = 1;
             telainicial = 1;
             parte2 = 0;
             parte1 = 0;
@@ -564,9 +565,10 @@ void reinicia(){
     descer = 0;
     subir = 1;
     zerar = 0;
-    pausa = 0;
+    pausa = 1;
     parte2 = 0;
     parte1 = 1;
+    pausa = 0;
     reiniciar = 0;
     quedaparte2 = 0;
     desenhaMinhaCena();
@@ -691,8 +693,11 @@ void GerenciaMouse(int button, int state, int x_i, int y_i){
             && telainicial == 1){
                 telainicial = 0;
                 parte1 = 1;
+                parte2 = 0;
+                creditos = 0;
                 pausa = 0;
-                desenhaMinhaCena();
+                sobefundo = 0;
+                sobeobjeto = 0;
                 atualiza();
             }
     else if(button == GLUT_LEFT_BUTTON && testeColisao(x,x,y,y,65,25,90,70) == 1
