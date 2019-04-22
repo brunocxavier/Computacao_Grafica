@@ -4,21 +4,13 @@
 	<ActiveTarget name="Windows" />
 	<File name="..\main.c" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="12932" topLine="231" />
+			<Cursor1 position="21408" topLine="602" />
 		</Cursor>
 		<Folding>
-			<Collapse line="64" />
-			<Collapse line="72" />
-			<Collapse line="86" />
-			<Collapse line="106" />
-			<Collapse line="121" />
-			<Collapse line="138" />
-			<Collapse line="375" />
-			<Collapse line="451" />
-			<Collapse line="478" />
-			<Collapse line="508" />
-			<Collapse line="529" />
-			<Collapse line="932" />
+			<Collapse line="415" />
+			<Collapse line="446" />
+			<Collapse line="551" />
+			<Collapse line="577" />
 		</Folding>
 	</File>
 </CodeBlocks_layout_file>
