@@ -357,19 +357,6 @@ void desenhaTelafinal(){
     escreve(GLUT_BITMAP_TIMES_ROMAN_24, "pontos",45 ,70 ,10);
 }
 
-void fimdeTelafinal(){
-    if(telafinal == 1){
-        fimdetelafinal++;
-        if(fimdetelafinal >= 1650){
-            creditos = 1;
-            telafinal = 0;
-            fimdetelafinal = 0;
-            pausa = 0;
-        }
-        glutTimerFunc(33, fimdeTelafinal, 0);
-    }
-}
-
 void desenhaCorfirmacao(){
     glColor3f(0.63,0.32,0.17);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -435,53 +422,11 @@ void desenhaMinhaCena(){
     }
     else if(telafinal == 1){
         desenhaTelafinal();
-        fimdeTelafinal();
     }
     else if(creditos == 1){
         desenhaCreditos();
-        fimdeCreditos();
     }
-
     glutSwapBuffers();
-}
-
-void fimdeCreditos(){
-    fimdecreditos++;
-    int parada = 0;
-    if(creditos == 1){
-        if(pontosparte2 == 0){
-            parada = 165;
-        }
-        else{
-            parada = 3700;
-        }
-        if(fimdecreditos >= parada){
-            criaPeixes();
-            glutPostRedisplay();
-            pontostotais = 0;
-            pontosparte2 = 0;
-            sprintf(pontosescreve, "%i", pontostotais);
-            sprintf(pontosescreve2, "%d",pontosparte2);
-            sobefundo = 0;
-            sobeobjeto = 0;
-            quedaparte2 = 0;
-            movanzol = 0;
-            pontostotais = 0;
-            pontosparte2 = 0;
-            descer = 0;
-            subir = 1;
-            zerar = 0;
-            pausa = 1;
-            telainicial = 1;
-            parte2 = 0;
-            parte1 = 0;
-            reiniciar = 0;
-            desenhaMinhaCena();
-            atualiza();
-            glutSwapBuffers();
-        }
-        glutTimerFunc(33, fimdeCreditos, 0);
-    }
 }
 
 void atualiza(){
@@ -545,6 +490,21 @@ void atualiza(){
                 telafinal = 1;
             }
         }
+        else if(telafinal == 1){
+            fimdetelafinal++;
+            if(fimdetelafinal >= 150){
+                creditos = 1;
+                telafinal = 0;
+                fimdetelafinal = 0;
+                pausa = 0;
+            }
+        }
+        else if(creditos == 1){
+            fimdecreditos++;
+            if(fimdecreditos >= 150){
+                reinicia();
+            }
+        }
         glutSwapBuffers();
         glutTimerFunc(33, atualiza, 10);
     }
@@ -565,12 +525,18 @@ void reinicia(){
     descer = 0;
     subir = 1;
     zerar = 0;
-    pausa = 1;
     parte2 = 0;
-    parte1 = 1;
-    pausa = 0;
-    reiniciar = 0;
+    creditos = 0;
     quedaparte2 = 0;
+    if(reiniciar == 0){
+        telainicial = 1;
+        pausa = 1;
+    }
+    else{
+        parte1 = 1;
+        pausa = 0;
+    }
+    reiniciar = 0;
     desenhaMinhaCena();
     atualiza();
     glutSwapBuffers();
@@ -704,6 +670,12 @@ void GerenciaMouse(int button, int state, int x_i, int y_i){
             && telainicial == 1){
                 telainicial = 0;
                 creditos = 1;
+                parte1 = 0;
+                parte2 = 0;
+                pausa = 0;
+                fimdecreditos = 0;
+                fprintf(log,"%d ",fimdecreditos);
+                atualiza();
             }
     else if(button == GLUT_LEFT_BUTTON && testeColisao(x,x,y,y,65,25,60,40) == 1
             && telainicial == 1){
@@ -1092,7 +1064,7 @@ void iniciatexturas(){
 // Função principal
 int main(int argc, char** argv){
     //log=fopen("peixes.log","w");
-    setbuf(log,NULL);
+    //setbuf(log,NULL);
     criaPeixes();
 
     glutInit(&argc, argv);
