@@ -57,11 +57,13 @@ int reiniciar = 0;
 int fechar = 0;
 int telainicial = 1;
 int creditos = 0;
+int instrucoes = 0;
 int telafinal = 0;
 int parte1 = 0;
 int parte2 = 0;
 int quedaparte2 = 0;
 int fimdecreditos = 0;
+int fimdeinstrucoes = 0;
 int fimdetelafinal = 0;
 int tamanhosx[10] = {10,10,10,10,10,15,15,40,40,40};
 int tamanhosy[10] = {7,7,7,7,7,20,20,10,10,30};
@@ -378,15 +380,45 @@ void desenhaTelainicial(){
     escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Pescaria: o jogo",30,140,7);
     escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Iniciar",38,108,7);
     escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Creditos",38,78,7);
-    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Fechar",38,48,7);
-    glColor3f(1,0,0);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Instucoes",38,48,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Fechar",38,18,7);
+    glColor3f(1,1,1);
     desenhaRetanguloTxt(25,100,40,20,6,texturacaixagrande);
     desenhaRetanguloTxt(25,70,40,20,6,texturacaixagrande);
     desenhaRetanguloTxt(25,40,40,20,6,texturacaixagrande);
+    desenhaRetanguloTxt(25,10,40,20,6,texturacaixagrande);
+}
+
+void desenhaInstrucoes(){
+    glColor3f(1,0,0);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Na primeira parte use as setas",5,150,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"para controlar o anzol.",5,145,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"O seu objetivo e pescar.",5,140,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Cada peixe possui uma pontuacao",5,135,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Que sao:",5,130,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"+250",45,120,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"-250",45,110,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"-500",45,100,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"-1000",45,90,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Na segunda parte pressione o",5,80,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"botao esquerdo do mouse para",5,75,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"posicionar a mira.",5,70,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"O tiro sera dado automaticamente",5,65,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"se a mira estiver correta.",5,60,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Aperte p para pausar",5,50,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"r para reiniciar e",5,45,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"esc para fechar",5,40,7);
+    escreve(GLUT_BITMAP_TIMES_ROMAN_24,"BOA SORTE!!!",35,25,7);
+    glColor3f(1,1,1);
+    desenhaRetanguloTxt(0,0,90,160,4,texturafundo);
+    desenhaRetanguloTxt(30,120,10,7,6,texturapeixedir[0]);
+    desenhaRetanguloTxt(20,110,20,5,6,texturabaracudadir[0]);
+    desenhaRetanguloTxt(32.5,95,7.5,10,6,texturaaguaviva[0]);
+    desenhaRetanguloTxt(30,86,10,7.5,6,texturatubaraodir[0]);
 }
 
 void desenhaCreditos(){
-    glColor3f(1,1,1);
+    glColor3f(0,0,0);
     escreve(GLUT_BITMAP_HELVETICA_18,"Direcao de Desnvolvimento",28,130,10);
     escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Bruno Xavier",28,125,10);
     escreve(GLUT_BITMAP_HELVETICA_18,"Testes",28,115,10);
@@ -398,6 +430,8 @@ void desenhaCreditos(){
     escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Bruno Xavier",28,75,10);
     escreve(GLUT_BITMAP_TIMES_ROMAN_24,"Ricardo Xavier",28,70,10);
     escreve(GLUT_BITMAP_TIMES_ROMAN_24,"E voce",28,65,10);
+    glColor3f(1,1,1);
+    desenhaRetanguloTxt(0,0,90,160,4,texturafundo);
 }
 // Rotina de desenho
 void desenhaMinhaCena(){
@@ -407,6 +441,9 @@ void desenhaMinhaCena(){
         if(fechar == 1){
             desenhaCorfirmacao();
         }
+    }
+    else if(instrucoes == 1){
+        desenhaInstrucoes();
     }
     else if(parte1 == 1){
         desenhaJogo();
@@ -422,6 +459,7 @@ void desenhaMinhaCena(){
     }
     else if(telafinal == 1){
         desenhaTelafinal();
+
     }
     else if(creditos == 1){
         desenhaCreditos();
@@ -490,12 +528,20 @@ void atualiza(){
                 telafinal = 1;
             }
         }
+        else if(instrucoes == 1){
+            fimdeinstrucoes++;
+            if(fimdeinstrucoes >= 450){
+                fimdeinstrucoes = 0;
+                reinicia();
+            }
+        }
         else if(telafinal == 1){
             fimdetelafinal++;
-            if(fimdetelafinal >= 150){
+            if(fimdetelafinal >= 90){
                 creditos = 1;
                 telafinal = 0;
                 fimdetelafinal = 0;
+                fimdecreditos = 0;
                 pausa = 0;
             }
         }
@@ -527,6 +573,7 @@ void reinicia(){
     zerar = 0;
     parte2 = 0;
     creditos = 0;
+    instrucoes = 0;
     quedaparte2 = 0;
     if(reiniciar == 0){
         telainicial = 1;
@@ -674,10 +721,19 @@ void GerenciaMouse(int button, int state, int x_i, int y_i){
                 parte2 = 0;
                 pausa = 0;
                 fimdecreditos = 0;
-                fprintf(log,"%d ",fimdecreditos);
                 atualiza();
             }
     else if(button == GLUT_LEFT_BUTTON && testeColisao(x,x,y,y,65,25,60,40) == 1
+            && telainicial == 1){
+                telainicial = 0;
+                instrucoes = 1;
+                parte1 = 0;
+                parte2 = 0;
+                pausa = 0;
+                fimdeinstrucoes = 0;
+                atualiza();
+            }
+    else if(button == GLUT_LEFT_BUTTON && testeColisao(x,x,y,y,65,25,30,10) == 1
             && telainicial == 1){
                 exit(0);
             }
